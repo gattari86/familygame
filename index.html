@@ -1,0 +1,617 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Game Night</title>
+    <style>
+        /* CSS Variables for easy theme tweaking */
+        :root {
+            --bg-color: #1a237e; /* Deep Navy */
+            --card-bg: #283593; /* Slightly lighter navy */
+            --primary-accent: #ff4081; /* Electric Pink */
+            --secondary-accent: #00e5ff; /* Neon Cyan */
+            --tertiary-accent: #76ff03; /* Lime Green */
+            --quaternary-accent: #ffea00; /* Bright Yellow */
+            --text-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --glow-color-primary: rgba(255, 64, 129, 0.7);
+            --glow-color-secondary: rgba(0, 229, 255, 0.7);
+            --font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        }
+
+        /* Basic Body and Layout Styling */
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+        }
+
+        /* Header Styling */
+        header {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--quaternary-accent);
+            margin: 0;
+            text-shadow: 2px 2px 4px var(--shadow-color);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--secondary-accent);
+            margin: 5px 0 0;
+        }
+
+        /* Card Component Style */
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 20px var(--shadow-color);
+            border: 2px solid var(--secondary-accent);
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--primary-accent);
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        /* Dice Section */
+        #dice {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+
+        #dice:active {
+            transform: scale(0.95);
+        }
+
+        .dice-face {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, var(--tertiary-accent), #5dbb02);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--bg-color);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .dice-face.shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0) rotate(2deg); }
+            20%, 80% { transform: translate3d(2px, 0, 0) rotate(-2deg); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0) rotate(4deg); }
+            40%, 60% { transform: translate3d(4px, 0, 0) rotate(-4deg); }
+        }
+
+
+        #diceResult {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--quaternary-accent);
+            min-height: 20px; /* Reserve space */
+        }
+
+        /* Team Randomizer Section */
+        #teams {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--tertiary-accent);
+            min-height: 70px; /* Reserve space */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .team-display {
+            background-color: rgba(0,0,0,0.2);
+            padding: 5px 15px;
+            border-radius: 10px;
+        }
+
+        /* Scoreboard Section */
+        .player-row {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 0.8fr 1fr;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .player-row.winner {
+            background-color: var(--quaternary-accent);
+            color: var(--bg-color);
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--quaternary-accent);
+        }
+        
+        .player-row.winner .star-icon {
+            color: var(--bg-color);
+        }
+        
+        .player-row:not(:last-child) {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .stars-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .star-icon {
+            font-size: 1.5rem;
+            color: var(--quaternary-accent);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+        }
+        
+        .star-icon.pop {
+            transform: scale(1.5);
+        }
+
+        .stars-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 20px;
+        }
+
+        .total-points {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Buttons and Inputs */
+        .btn {
+            background: var(--primary-accent);
+            color: var(--text-color);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+        
+        .btn:hover, .btn:focus-visible {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--shadow-color), 0 0 15px var(--glow-color-primary);
+            outline: 2px solid var(--primary-accent);
+            outline-offset: 2px;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        .btn.secondary {
+            background: var(--secondary-accent);
+            color: var(--bg-color);
+        }
+        
+        .btn.secondary:hover, .btn.secondary:focus-visible {
+             box-shadow: 0 6px 12px var(--shadow-color), 0 0 15px var(--glow-color-secondary);
+             outline-color: var(--secondary-accent);
+        }
+        
+        .btn.tertiary {
+             background: transparent;
+             border: 2px solid var(--secondary-accent);
+             color: var(--secondary-accent);
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .star-btn {
+            background-color: rgba(255,255,255,0.2);
+            color: var(--text-color);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        
+        .star-btn:active {
+            transform: scale(0.9);
+        }
+
+        .round-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--secondary-accent);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: bold;
+            -moz-appearance: textfield; /* Firefox */
+        }
+        
+        .round-input::-webkit-outer-spin-button,
+        .round-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Winner Banner */
+        #winner-banner {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--tertiary-accent);
+            margin-top: 20px;
+            min-height: 30px; /* Reserve space */
+            transition: opacity 0.3s;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 1.5rem; }
+            .player-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                text-align: center;
+            }
+            .player-name { text-align: center; }
+            .btn-group { flex-direction: column; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Family Game Night</h1>
+        <p>Roll, Teams, Score, Stars</p>
+    </header>
+
+    <!-- Section 1: Dice Roller -->
+    <div class="game-card">
+        <h2>Dice Roller</h2>
+        <div id="dice" role="button" tabindex="0" aria-label="Roll the dice">
+            <div class="dice-face">?</div>
+        </div>
+        <p id="diceResult"></p>
+    </div>
+
+    <!-- Section 2: Team Randomizer -->
+    <div class="game-card">
+        <h2>Team Randomizer</h2>
+        <div id="teams"></div>
+        <div class="btn-group">
+            <button id="btnTeams" class="btn">Randomize Teams</button>
+            <button id="btnClearTeams" class="btn tertiary">Clear Teams</button>
+        </div>
+    </div>
+
+    <!-- Section 3: Scoreboard -->
+    <div id="scoreboard" class="game-card">
+        <h2>Scoreboard</h2>
+        <div id="player-list">
+            <!-- Player rows will be generated by JavaScript -->
+        </div>
+        <div id="winner-banner"></div>
+        <div class="btn-group">
+            <button id="btnAddRound" class="btn">Add Round Points</button>
+            <button id="btnWinner" class="btn secondary">Calculate Winner</button>
+            <button id="btnReset" class="btn tertiary">Reset Game</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- STATE & CONSTANTS ---
+            const players = ['Papi', 'Daddy', 'Sissy', 'Cy'];
+            let scores = {};
+            let stars = {};
+
+            // --- DOM ELEMENTS ---
+            const diceElement = document.querySelector('#dice .dice-face');
+            const diceResultElement = document.getElementById('diceResult');
+            const teamsContainer = document.getElementById('teams');
+            const playerListContainer = document.getElementById('player-list');
+            const winnerBanner = document.getElementById('winner-banner');
+
+            // --- INITIALIZATION ---
+            
+            /**
+             * Initializes the game state, either from localStorage or by setting defaults.
+             * Renders the initial scoreboard.
+             */
+            function initializeGame() {
+                const savedScores = localStorage.getItem('gameScores');
+                const savedStars = localStorage.getItem('gameStars');
+
+                if (savedScores && savedStars) {
+                    scores = JSON.parse(savedScores);
+                    stars = JSON.parse(savedStars);
+                } else {
+                    resetState();
+                }
+                renderScoreboard();
+                setupEventListeners();
+            }
+            
+            /**
+             * Sets up all the event listeners for the game controls.
+             */
+            function setupEventListeners() {
+                // Dice roll
+                document.getElementById('dice').addEventListener('click', rollDice);
+                document.getElementById('dice').addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' || e.code === 'Enter') rollDice();
+                });
+
+                // Team buttons
+                document.getElementById('btnTeams').addEventListener('click', randomizeTeams);
+                document.getElementById('btnClearTeams').addEventListener('click', clearTeams);
+
+                // Scoreboard buttons
+                document.getElementById('btnAddRound').addEventListener('click', addRound);
+                document.getElementById('btnWinner').addEventListener('click', calculateWinner);
+                document.getElementById('btnReset').addEventListener('click', resetGame);
+            }
+
+            // --- CORE GAME LOGIC ---
+
+            /**
+             * Rolls a die with values from 1 to 5.
+             * Animates the die and displays the result.
+             */
+            function rollDice() {
+                // Animate the dice
+                diceElement.classList.add('shake');
+                
+                // Calculate result after a short delay for animation
+                setTimeout(() => {
+                    const result = Math.floor(Math.random() * 5) + 1;
+                    diceElement.textContent = result;
+                    diceResultElement.textContent = `You rolled: ${result}`;
+                    diceElement.classList.remove('shake');
+                }, 500);
+            }
+
+            /**
+             * Randomly shuffles the players and assigns them to two teams.
+             */
+            function randomizeTeams() {
+                clearHighlights();
+                let shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
+                const teamA = `${shuffledPlayers[0]} + ${shuffledPlayers[1]}`;
+                const teamB = `${shuffledPlayers[2]} + ${shuffledPlayers[3]}`;
+                
+                teamsContainer.innerHTML = `
+                    <div class="team-display">Team A: ${teamA}</div>
+                    <div class="team-display">Team B: ${teamB}</div>
+                `;
+            }
+            
+            /**
+             * Clears the team display area.
+             */
+            function clearTeams() {
+                teamsContainer.innerHTML = '';
+            }
+
+            /**
+             * Adds or removes points from the current round inputs to each player's total score.
+             * To remove points, enter a negative number (e.g., -5).
+             */
+            function addRound() {
+                clearHighlights();
+                const inputs = document.querySelectorAll('.round-input');
+                let pointsChanged = false;
+                inputs.forEach(input => {
+                    const player = input.dataset.player;
+                    const value = parseInt(input.value, 10);
+                    // Allow any non-zero integer, positive or negative, to be processed.
+                    if (!isNaN(value) && value !== 0) {
+                        scores[player] += value;
+                        pointsChanged = true;
+                    }
+                    input.value = ''; // Clear input after processing
+                });
+                
+                if (pointsChanged) {
+                    saveState();
+                    renderScoreboard();
+                }
+            }
+
+            /**
+             * Updates the star count for a specific player.
+             * @param {string} player - The name of the player.
+             * @param {number} change - The amount to change the stars by (+1 or -1).
+             */
+            function updateStars(player, change) {
+                clearHighlights();
+                const newStars = (stars[player] || 0) + change;
+                if (newStars >= 0) {
+                    stars[player] = newStars;
+                    
+                    // Animate the star icon
+                    const starIcon = document.querySelector(`.stars-control[data-player="${player}"] .star-icon`);
+                    if (change > 0 && starIcon) {
+                        starIcon.classList.add('pop');
+                        setTimeout(() => starIcon.classList.remove('pop'), 200);
+                    }
+                    
+                    saveState();
+                    renderScoreboard();
+                }
+            }
+            
+            /**
+             * Calculates and highlights the player(s) with the highest score.
+             */
+            function calculateWinner() {
+                clearHighlights();
+                let highScore = -Infinity;
+                let winners = [];
+
+                for (const player of players) {
+                    if (scores[player] > highScore) {
+                        highScore = scores[player];
+                        winners = [player];
+                    } else if (scores[player] === highScore) {
+                        winners.push(player);
+                    }
+                }
+
+                if (winners.length > 0 && highScore > -Infinity) {
+                    // Highlight winner rows
+                    winners.forEach(winner => {
+                        document.querySelector(`.player-row[data-player="${winner}"]`).classList.add('winner');
+                    });
+                    
+                    // Display winner banner
+                    const winnerText = winners.length > 1 ? `Winners: ${winners.join(' and ')}` : `Winner: ${winners[0]}`;
+                    winnerBanner.textContent = winnerText;
+
+                } else {
+                    winnerBanner.textContent = "No scores yet to determine a winner!";
+                }
+            }
+
+            /**
+             * Resets the entire game to its initial state and clears localStorage.
+             */
+            function resetGame() {
+                if (confirm("Are you sure you want to reset the entire game? All scores and stars will be lost.")) {
+                    localStorage.removeItem('gameScores');
+                    localStorage.removeItem('gameStars');
+                    resetState();
+                    clearTeams();
+                    clearHighlights();
+                    diceResultElement.textContent = '';
+                    diceElement.textContent = '?';
+                    renderScoreboard();
+                }
+            }
+            
+            // --- UTILITY & RENDER FUNCTIONS ---
+            
+            /**
+             * Renders the entire scoreboard based on the current state.
+             */
+            function renderScoreboard() {
+                playerListContainer.innerHTML = ''; // Clear existing list
+                players.forEach(player => {
+                    const playerScore = scores[player] || 0;
+                    const playerStars = stars[player] || 0;
+
+                    const playerRow = document.createElement('div');
+                    playerRow.className = 'player-row';
+                    playerRow.dataset.player = player;
+
+                    playerRow.innerHTML = `
+                        <div class="player-name">${player}</div>
+                        <div class="stars-control" data-player="${player}">
+                            <button class="star-btn" data-action="minus" aria-label="Remove star for ${player}">-</button>
+                            <span class="star-icon" aria-hidden="true">⭐</span>
+                            <span class="stars-count">${playerStars}</span>
+                            <button class="star-btn" data-action="plus" aria-label="Add star for ${player}">+</button>
+                        </div>
+                        <div class="total-points" title="${player}'s total score">${playerScore}</div>
+                        <input type="number" class="round-input" data-player="${player}" placeholder="Pts" aria-label="Points for ${player} this round">
+                    `;
+                    playerListContainer.appendChild(playerRow);
+                });
+                
+                // Re-attach event listeners for the newly created star buttons
+                document.querySelectorAll('.star-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const player = e.target.closest('.stars-control').dataset.player;
+                        const action = e.target.dataset.action;
+                        updateStars(player, action === 'plus' ? 1 : -1);
+                    });
+                });
+            }
+            
+            /**
+             * Resets the scores and stars state variables to zero.
+             */
+            function resetState() {
+                players.forEach(player => {
+                    scores[player] = 0;
+                    stars[player] = 0;
+                });
+            }
+
+            /**
+             * Saves the current scores and stars to localStorage.
+             */
+            function saveState() {
+                localStorage.setItem('gameScores', JSON.stringify(scores));
+                localStorage.setItem('gameStars', JSON.stringify(stars));
+            }
+            
+            /**
+             * Clears all winner highlights and the winner banner text.
+             */
+            function clearHighlights() {
+                document.querySelectorAll('.player-row').forEach(row => row.classList.remove('winner'));
+                winnerBanner.textContent = '';
+            }
+
+            // --- START THE GAME ---
+            initializeGame();
+        });
+    </script>
+</body>
+</html>
